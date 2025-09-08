@@ -6,6 +6,13 @@ use semver::Version;
 use std::path::PathBuf;
 
 fn probe() -> Library {
+    let _ =
+        env::var("LIBCRYPTSETUP_RS_PKG_CONFIG_PATH").map(|v| env::set_var("PKG_CONFIG_PATH", v));
+    let _ = env::var("LIBCRYPTSETUP_RS_PKG_CONFIG_LIBDIR")
+        .map(|v| env::set_var("PKG_CONFIG_LIBDIR", v));
+    let _ = env::var("LIBCRYPTSETUP_RS_PKG_CONFIG_SYSROOT_DIR")
+        .map(|v| env::set_var("PKG_CONFIG_SYSROOT_DIR", v));
+
     let mut config = Config::new();
     #[cfg(feature = "static")]
     config.statik(true);
@@ -23,7 +30,11 @@ fn build_safe_free() {
 
 fn generate_bindings(library: &Library, safe_free_is_needed: bool) {
     let builder = bindgen::Builder::default()
-        .rust_target(env!("CARGO_PKG_RUST_VERSION").parse().expect("valid rust version"))
+        .rust_target(
+            env!("CARGO_PKG_RUST_VERSION")
+                .parse()
+                .expect("valid rust version"),
+        )
         .clang_args(
             library
                 .include_paths
